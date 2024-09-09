@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>거북이 경주 베팅 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .turtle {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            margin: 10px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h1>거북이 경주 베팅 게임</h1>
+    <div id="raceArea">
+        <div class="turtle" id="red" style="background-color: red;"></div>
+        <div class="turtle" id="blue" style="background-color: blue;"></div>
+        <div class="turtle" id="green" style="background-color: green;"></div>
+    </div>
+    <div>
+        <p>현재 금액: <span id="amount">100000</span> 원</p>
+        <input type="number" id="betAmount" placeholder="베팅 금액" min="1">
+        <select id="betTurtle">
+            <option value="1">빨간색</option>
+            <option value="2">파란색</option>
+            <option value="3">초록색</option>
+        </select>
+        <button onclick="startRace()">경주 시작</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        let initialAmount = 100000;
+
+        function startRace() {
+            const betAmount = parseInt(document.getElementById("betAmount").value);
+            const betTurtle = parseInt(document.getElementById("betTurtle").value);
+            if (betAmount > initialAmount || betAmount <= 0) {
+                alert("유효한 베팅 금액을 입력하세요.");
+                return;
+            }
+
+            const turtles = [
+                { color: "red", element: document.getElementById("red") },
+                { color: "blue", element: document.getElementById("blue") },
+                { color: "green", element: document.getElementById("green") }
+            ];
+
+            let raceOn = true;
+            let winnerColor = "";
+
+            const race = setInterval(() => {
+                turtles.forEach(turtle => {
+                    if (raceOn) {
+                        const distance = Math.random() * 10;
+                        turtle.element.style.transform = `translateX(${(parseFloat(turtle.element.style.transform.replace("translateX(", "").replace("px)", "")) || 0) + distance}px)`;
+                        if (parseFloat(turtle.element.style.transform.replace("translateX(", "").replace("px)", "")) >= 390) {
+                            raceOn = false;
+                            winnerColor = turtle.color;
+                            clearInterval(race);
+                            showResult(winnerColor, betAmount, betTurtle);
+                        }
+                    }
+                });
+            }, 100);
+        }
+
+        function showResult(winnerColor, betAmount, betTurtle) {
+            let resultText = `우승한 거북이는 ${winnerColor}입니다.<br>`;
+            if ((betTurtle === 1 && winnerColor === "red") || 
+                (betTurtle === 2 && winnerColor === "blue") || 
+                (betTurtle === 3 && winnerColor === "green")) {
+                const winnings = betAmount * 2;
+                initialAmount += winnings - betAmount;
+                resultText += `축하합니다! 당신의 수익은 ${winnings}원이 되었습니다.`;
+            } else {
+                initialAmount -= betAmount;
+                resultText += `안타깝습니다. 당신은 ${betAmount}원을 잃었습니다.`;
+            }
+            document.getElementById("amount").innerText = initialAmount;
+            document.getElementById("result").innerHTML = resultText;
+        }
+    </script>
+</body>
+</html>
